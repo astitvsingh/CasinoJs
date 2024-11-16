@@ -38,7 +38,7 @@ interface PokerPhaseConfig {
    * @property {number} communityCards
    * The maximum number of players that can be seated at the PokerTable[2-14].
    */
-  communityCards?: CardInterface[];
+  communityCards: CardInterface[];
 }
 
 /**

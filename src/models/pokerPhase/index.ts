@@ -220,28 +220,29 @@ class PokerPhase extends BaseEventEmitter implements PokerPhaseInterface {
    * });
    * ```
    */
-  constructor(config?: PokerPhaseConfig ) {
+  constructor(config: PokerPhaseConfig ) {
     super();
     this.__init(config);
   } 
 
-  private __init(config?: PokerPhaseConfig): void {
+  private __init(config: PokerPhaseConfig): void {
     // If config is undefined, use an empty object to avoid undefined property access
 
-    if (config) {
-       // Initialize properties with fallback values
-      this.__name = config.name ?? PokerPhases.PRE_FLOP;
-      this.__deck = config.deck ?? new Deck();
-      this.__communityCards = config.communityCards ?? this.__communityCards;
-      this.__players = config.players ?? this.__players;
-
-       // Initialize the pot with small blind and big blind
-    this.__initializeBlinds(config.smallBlind,config.bigBlind);
-    }
-
+   
+      // Initialize properties with fallback values
+    config.name?this.__setName(config.name):this.__setName(PokerPhases.PRE_FLOP);
+    config.deck?this.__setDeck(config.deck):this.__setDeck(new Deck());
+    config.communityCards?this.__setCommunityCards(config.communityCards):this.__setCommunityCards(this.__communityCards);
+    config.players?this.__setPlayers(config.players):this.__setPlayers(this.__players);
+ 
     if (this.getName() === PokerPhases.PRE_FLOP) {
       this.__deal(); // Deal cards to players if this is the "Pre-Flop" phase
     }
+
+       // Initialize the pot with small blind and big blind
+    this.__initializeBlinds(config.smallBlind,config.bigBlind);
+  
+
 
     // Emit `INITIALIZED` event after initialization
     this.emitEvent(PokerPhaseEvents.INITIALIZED, {
@@ -341,6 +342,45 @@ class PokerPhase extends BaseEventEmitter implements PokerPhaseInterface {
    */
   public getPlayers(): PokerPlayerInterface[] {
     return this.__players;
+  }
+
+  
+  /**
+   * #### Description
+   * Retrieves the list of players currently involved in the `PokerPhase`.
+   *
+   * #### Implements
+   * N/A
+   *
+   * #### Overrides
+   * N/A
+   *
+   * #### Purpose
+   * Accesses the players participating in the current phase, supporting functions that involve player actions or status.
+   *
+   * #### Events
+   * N/A
+   *
+   * #### Parameters
+   * N/A
+   *
+   * #### Returns
+   * - {PokerPlayerInterface[]}: An array of player objects involved in this phase.
+   *
+   * #### Usage
+   * This method is commonly used when the current players need to be accessed, such as for dealing cards or determining
+   * player turns.
+   *
+   * @returns {PokerPlayerInterface[]} - List of players in the phase.
+   *
+   * @example
+   * ```typescript
+   * const players = pokerPhase.getPlayers();
+   * console.log(players); // Outputs an array of player objects
+   * ```
+   */
+  public getPlayer(index:number): PokerPlayerInterface {
+    return this.__players[index];
   }
 
   /**
@@ -600,6 +640,36 @@ class PokerPhase extends BaseEventEmitter implements PokerPhaseInterface {
     return (this.__players = players);
   }
 
+   /**
+   * `setName`
+   * @public
+   * Returns the poker table's `id`.
+   * @returns {string} The poker table's `id`.
+   *
+   * @example
+   * const rank = card.getRank();
+   * console.log(rank); // "A"
+   */
+   private __setDeck(deck: DeckInterface): DeckInterface {
+    this.__deck = deck;
+    return this.__deck;
+  }
+
+   /**
+   * `setName`
+   * @public
+   * Returns the poker table's `id`.
+   * @returns {string} The poker table's `id`.
+   *
+   * @example
+   * const rank = card.getRank();
+   * console.log(rank); // "A"
+   */
+   private __setCommunityCards(community: CardInterface[]): CardInterface[] {
+    this.__communityCards = community;
+    return this.__communityCards;
+  }
+
   private __initializeBlinds(smallBlind:number,bigBlind:number): void {
     const smallBlindPos = this.getSmallBlindPos();
     const bigBlindPos = this.getBigBlindPos();
@@ -607,14 +677,14 @@ class PokerPhase extends BaseEventEmitter implements PokerPhaseInterface {
     const bigBlindAmount = bigBlind; // Example big blind amount
   
     // Deduct small blind from the small blind player
-    const smallBlindPlayer = this.getPlayers()[smallBlindPos];
+    const smallBlindPlayer = this.getPlayer(smallBlindPos);
     if (smallBlindPlayer) {
       smallBlindPlayer.bet(smallBlindAmount); // Deduct from player's chips
       this.__setPot(this.getPot() + smallBlindAmount); // Add to the pot
     }
   
     // Deduct big blind from the big blind player
-    const bigBlindPlayer = this.getPlayers()[bigBlindPos];
+    const bigBlindPlayer = this.getPlayer(bigBlindPos);
     if (bigBlindPlayer) {
       bigBlindPlayer.bet(bigBlindAmount); // Deduct from player's chips
       this.__setPot(this.getPot() + bigBlindAmount); // Add to the pot

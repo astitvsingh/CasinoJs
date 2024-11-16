@@ -55,7 +55,7 @@ class PokerGame extends BaseEventEmitter implements PokerGameInterface {
    * @property {number} __bigBlind
    * The maximum number of players that can be seated at the PokerTable[2-14].
    */
-  private __currentPhase: PokerPhaseInterface = new PokerPhase();
+  private __currentPhase: PokerPhaseInterface|undefined = undefined;
 
   /**
    * @property {CardInterface[]} __communityCards
@@ -105,6 +105,7 @@ class PokerGame extends BaseEventEmitter implements PokerGameInterface {
         players: this.getPlayers(),
         smallBlind:config.smallBlind?config.smallBlind:1,
         bigBlind:config.bigBlind?config.bigBlind:2,
+        communityCards:[],
       });
       // this.__validatePlayerList();
 
