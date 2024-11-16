@@ -1,7 +1,7 @@
 //@collapse
 
 // Import Enums
-import { PokerPhaseEvents, PokerPhases , Source } from "../../enums";
+import { PokerPhaseEvents, PokerPhases, Source } from "../../enums";
 
 // Import Interfaces
 import {
@@ -220,29 +220,32 @@ class PokerPhase extends BaseEventEmitter implements PokerPhaseInterface {
    * });
    * ```
    */
-  constructor(config: PokerPhaseConfig ) {
+  constructor(config: PokerPhaseConfig) {
     super();
     this.__init(config);
-  } 
+  }
 
   private __init(config: PokerPhaseConfig): void {
     // If config is undefined, use an empty object to avoid undefined property access
 
-   
-      // Initialize properties with fallback values
-    config.name?this.__setName(config.name):this.__setName(PokerPhases.PRE_FLOP);
-    config.deck?this.__setDeck(config.deck):this.__setDeck(new Deck());
-    config.communityCards?this.__setCommunityCards(config.communityCards):this.__setCommunityCards(this.__communityCards);
-    config.players?this.__setPlayers(config.players):this.__setPlayers(this.__players);
- 
+    // Initialize properties with fallback values
+    config.name
+      ? this.__setName(config.name)
+      : this.__setName(PokerPhases.PRE_FLOP);
+    config.deck ? this.__setDeck(config.deck) : this.__setDeck(new Deck());
+    config.communityCards
+      ? this.__setCommunityCards(config.communityCards)
+      : this.__setCommunityCards(this.__communityCards);
+    config.players
+      ? this.__setPlayers(config.players)
+      : this.__setPlayers(this.__players);
+
     if (this.getName() === PokerPhases.PRE_FLOP) {
       this.__deal(); // Deal cards to players if this is the "Pre-Flop" phase
     }
 
-       // Initialize the pot with small blind and big blind
-    this.__initializeBlinds(config.smallBlind,config.bigBlind);
-  
-
+    // Initialize the pot with small blind and big blind
+    this.__initializeBlinds(config.smallBlind, config.bigBlind);
 
     // Emit `INITIALIZED` event after initialization
     this.emitEvent(PokerPhaseEvents.INITIALIZED, {
@@ -344,7 +347,6 @@ class PokerPhase extends BaseEventEmitter implements PokerPhaseInterface {
     return this.__players;
   }
 
-  
   /**
    * #### Description
    * Retrieves the list of players currently involved in the `PokerPhase`.
@@ -379,8 +381,46 @@ class PokerPhase extends BaseEventEmitter implements PokerPhaseInterface {
    * console.log(players); // Outputs an array of player objects
    * ```
    */
-  public getPlayer(index:number): PokerPlayerInterface {
+  public getPlayer(index: number): PokerPlayerInterface {
     return this.__players[index];
+  }
+
+  /**
+   * #### Description
+   * Retrieves the list of players currently involved in the `PokerPhase`.
+   *
+   * #### Implements
+   * N/A
+   *
+   * #### Overrides
+   * N/A
+   *
+   * #### Purpose
+   * Accesses the players participating in the current phase, supporting functions that involve player actions or status.
+   *
+   * #### Events
+   * N/A
+   *
+   * #### Parameters
+   * N/A
+   *
+   * #### Returns
+   * - {PokerPlayerInterface[]}: An array of player objects involved in this phase.
+   *
+   * #### Usage
+   * This method is commonly used when the current players need to be accessed, such as for dealing cards or determining
+   * player turns.
+   *
+   * @returns {PokerPlayerInterface[]} - List of players in the phase.
+   *
+   * @example
+   * ```typescript
+   * const players = pokerPhase.getPlayers();
+   * console.log(players); // Outputs an array of player objects
+   * ```
+   */
+  public getCurrentPlayer(): PokerPlayerInterface {
+    return this.__players[this.getCurrentPlayerPos()];
   }
 
   /**
@@ -494,25 +534,23 @@ class PokerPhase extends BaseEventEmitter implements PokerPhaseInterface {
     return this.__pot;
   }
 
-  
   public getDealerPos(): number {
     return 0;
   }
 
   public getSmallBlindPos(): number {
-    if (this.getPlayers().length===2) {
+    if (this.getPlayers().length === 2) {
       return 0;
     }
     return 1;
   }
 
   public getBigBlindPos(): number {
-    if (this.getPlayers().length===2) {
+    if (this.getPlayers().length === 2) {
       return 1;
     }
     return 2;
   }
-
 
   /**************************************************************************************************************
    * UPDATE METHODS (MODIFYING EXISTING OBJECTS)
@@ -533,7 +571,8 @@ class PokerPhase extends BaseEventEmitter implements PokerPhaseInterface {
    */
   private __deal(): boolean {
     // Deal two cards to each player
-    for (let i = 0; i < 2; i++) { // Two rounds of dealing
+    for (let i = 0; i < 2; i++) {
+      // Two rounds of dealing
       this.getPlayers().forEach((player) => {
         const card = this.getDeck().draw(); // Draw a card from the deck
         if (card) {
@@ -594,7 +633,7 @@ class PokerPhase extends BaseEventEmitter implements PokerPhaseInterface {
    **************************************************************************************************************/
 
   protected _bet(amount: number): boolean {
-    this.getPlayers()[this.getCurrentPlayerPos()]?.bet(amount);
+    this.getCurrentPlayer()?.bet(amount);
     this.__setPot(this.getPot() + amount);
     this.nextPlayer();
 
@@ -640,7 +679,7 @@ class PokerPhase extends BaseEventEmitter implements PokerPhaseInterface {
     return (this.__players = players);
   }
 
-   /**
+  /**
    * `setName`
    * @public
    * Returns the poker table's `id`.
@@ -650,12 +689,12 @@ class PokerPhase extends BaseEventEmitter implements PokerPhaseInterface {
    * const rank = card.getRank();
    * console.log(rank); // "A"
    */
-   private __setDeck(deck: DeckInterface): DeckInterface {
+  private __setDeck(deck: DeckInterface): DeckInterface {
     this.__deck = deck;
     return this.__deck;
   }
 
-   /**
+  /**
    * `setName`
    * @public
    * Returns the poker table's `id`.
@@ -665,24 +704,24 @@ class PokerPhase extends BaseEventEmitter implements PokerPhaseInterface {
    * const rank = card.getRank();
    * console.log(rank); // "A"
    */
-   private __setCommunityCards(community: CardInterface[]): CardInterface[] {
+  private __setCommunityCards(community: CardInterface[]): CardInterface[] {
     this.__communityCards = community;
     return this.__communityCards;
   }
 
-  private __initializeBlinds(smallBlind:number,bigBlind:number): void {
+  private __initializeBlinds(smallBlind: number, bigBlind: number): void {
     const smallBlindPos = this.getSmallBlindPos();
     const bigBlindPos = this.getBigBlindPos();
     const smallBlindAmount = smallBlind; // Example small blind amount
     const bigBlindAmount = bigBlind; // Example big blind amount
-  
+
     // Deduct small blind from the small blind player
     const smallBlindPlayer = this.getPlayer(smallBlindPos);
     if (smallBlindPlayer) {
       smallBlindPlayer.bet(smallBlindAmount); // Deduct from player's chips
       this.__setPot(this.getPot() + smallBlindAmount); // Add to the pot
     }
-  
+
     // Deduct big blind from the big blind player
     const bigBlindPlayer = this.getPlayer(bigBlindPos);
     if (bigBlindPlayer) {
@@ -691,21 +730,21 @@ class PokerPhase extends BaseEventEmitter implements PokerPhaseInterface {
     }
   }
 
-//   private __isPhaseCompleted(): boolean {
-//     const players = this.getPlayers();
-    
-//     // Determine the highest bet in the current round
-//     const highestBet = Math.max(
-//       ...players.map((player) => player.getCurrentBet())
-//     );
+  //   private __isPhaseCompleted(): boolean {
+  //     const players = this.getPlayers();
 
-//     // Check if all active players have either folded or matched the highest bet
-//     const allActionsResolved = players.every((player) => {
-//       return player.isFolded() || player.getCurrentBet() === highestBet ;
-//     });
+  //     // Determine the highest bet in the current round
+  //     const highestBet = Math.max(
+  //       ...players.map((player) => player.getCurrentBet())
+  //     );
 
-//     return allActionsResolved;
-// }
+  //     // Check if all active players have either folded or matched the highest bet
+  //     const allActionsResolved = players.every((player) => {
+  //       return player.isFolded() || player.getCurrentBet() === highestBet ;
+  //     });
+
+  //     return allActionsResolved;
+  // }
 }
 
 export { PokerPhase };
